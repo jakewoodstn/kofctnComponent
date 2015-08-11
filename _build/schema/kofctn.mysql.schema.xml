@@ -1,6 +1,118 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model package="kofctn" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="storefinder" phpdoc-subpackage="model">
+<model version="1.1" package="kofctn" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="kofctn" phpdoc-subpackage="model">
 <object class="kofcuser" table="kofctn_kofcuser" extends="xPDOSimpleObject">
-<field key="name" dbtype="varchar" precision="50" phptype="string" null="false" default="" index="index" />
+	<field key="name" dbtype="varchar" precision="50" phptype="string" null="false" default="" />
+	<field key="createdAt" dbtype="date" phptype="date" null="false"/>
+	<field key="imagePath" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="firstName" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="preferredFirstName" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="lastName" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="primaryEmail" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="councilId" dbtype="int" precision="8" phptype="" null="false"/>
+	<field key="spouseFirstName" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="spouseLastName" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<composite alias="memberMemberAddress" class="memberAddress" local="id" foreign="userId" cardinality="many" owner="local"/>
+	<composite alias="memberPhone" class="phone" local="id" foreign="memberId" cardinality="many" owner="local"/>
+	<aggregate alias="memberCouncil" class="council" local="councilId" foreign="id" cardinality="one" owner="foreign"/>
+	<composite alias="memberCouncilOfficerAssignment" class="councilOfficerAssignment" local="id" foreign="memberId" cardinality="many" owner="local"/>
 </object>
+<object class="memberAddress" table="kofctn_memberAddress" extends="xPDOSimpleObject">
+	<field key="userId" dbtype="int" precision="8" phptype="" null="false"/>
+	<field key="addressType" dbtype="varchar" precision="10" phptype="string" null="false" default="" />
+	<field key="street1" dbtype="varchar" precision="255" phptype="string" null="false" default="" />
+	<field key="street2" dbtype="varchar" precision="255" phptype="string" null="true" default="" />
+	<field key="city" dbtype="varchar" precision="255" phptype="string" null="false" default="" />
+	<field key="state" dbtype="varchar" precision="2" phptype="string" null="false" default="" />
+	<field key="zip" dbtype="varchar" precision="10" phptype="string" null="false" default="" />
+	<aggregate alias="memberAddressMember" class="kofcuser" local="userId" foreign="id" cardinality="one" owner="foreign"/>
+</object>
+<object class="phone" table = "kofctn_phone" extends="xPDOSimpleObject">
+	<field key="councilId" dbtype="int" precision="8" phptype="" null="true"/>
+	<field key="memberId" dbtype="int" precision="8" phptype="" null="true"/>
+	<field key="phonetype" dbtype="varchar" precision="10" phptype="string" null="false"/>
+	<field key="rawnumber" dbtype="varchar" precision="10" phptype="string" null="false"/>
+	<field key="extension" dbtype="varchar" precision="10" phptype="string" null="true"/>
+	<aggregate alias="phoneMember" class="kofcuser" local="memberId" foreign="id" cardinality="one" owner="foreign"/>
+	<aggregate alias="phoneCouncil" class="council" local="councilId" foreign="id" cardinality="one" owner="foreign"/>
+</object>
+<object class="council" table="kofctn_council"  extends="xPDOSimpleObject">
+	<field key="councilNumber" dbtype="varchar" precision="6" phptype="string" null="false"/>
+	<field key="name" dbtype="varchar" precision="50" phptype="string" null="true"/>
+	<field key="created_at" dbtype="date" phptype="date" null="false"/>
+	<field key="imagePath" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="districtId" dbtype="int" precision="8" phptype="integer" null="true"/>
+	<composite alias="councilMember" class="kofcuser" local="id" foreign="councilId" cardinality="many" owner="local"/>
+	<composite alias="councilCouncilAddress" class="councilAddress" local="id" foreign="councilId" cardinality="many" owner="local"/>
+	<composite alias="councilPhone" class="phone" local="id" foreign="councilId" cardinality="many" owner="local"/>
+	<composite alias="councilCouncilOfficerAssignment" class="councilOfficerAssignment" local="id" foreign="councilId" cardinality="many" owner="local"/>
+	<aggregate alias="councilDistrict" class="district" local="districtId" foreign="id" cardinality="one" owner="foriegn"/>
+</object>	
+<object class="officerRole" table = "kofctn_officerRole" extends="xPDOSimpleObject">
+	<field key="roleName" dbtype="varchar" precision="255" phptype="string" null="false"/>
+	<field key="assignmentTypeName" dbtype="varchar" precision="20" phptype="string" null="false"/>
+	<composite alias="officerRoleCouncilOfficerAssignment" class="councilOfficerAssignment" local="id" foreign="officerRoleId" cardinality="many" owner="local"/>
+</object>
+<object class="councilAddress" table ="kofctn_councilAddress" extends="xPDOSimpleObject">	
+	<field key="councilId" dbtype="int" precision="8" phptype="" null="false"/>
+	<field key="addressType" dbtype="varchar" precision="50" phptype="string" null="false"/>
+	<field key="street1" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="street2" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="city" dbtype="varchar" precision="255" phptype="string" null="true"/>
+	<field key="state" dbtype="varchar" precision="5" phptype="string" null="true"/>
+	<field key="zip" dbtype="varchar" precision="10" phptype="string" null="true"/>
+	<aggregate alias="councilAddressCouncil" class="council" local="councilId" foreign="id" cardinality="one" owner="foreign"/>
+</object>
+<object class="award" table="kofctn_award"  extends="xPDOSimpleObject">
+	<field key="awardName" dbtype="varchar" precision="255" phptype="string" null="false"/>
+</object>
+<object class="councilAward" table="kofctn_councilAward"  extends="xPDOSimpleObject">
+	<field key="councilId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<field key="fraternalYearId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<field key="awardId" dbtype="int" precision="8" phptype="integer" null="false"/>
+</object>
+<object class="councilMeeting" table="kofctn_councilMeeting"  extends="xPDOSimpleObject">
+	<field key="councilId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<field key="meetingId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<field key="weekOfMonth" dbtype="int" precision="8" phptype="integer" null="true"/>
+	<field key="dayOfWeek" dbtype="int" precision="8" phptype="integer" null="true"/>
+	<field key="dayOfMonth" dbtype="int" precision="8" phptype="integer" null="true"/>
+	<field key="timeOfDay" dbtype="varchar" precision="255" phptype="string" null="true"/>
+</object>
+<object class="fraternalYear" table="kofctn_fraternalYear" extends="xPDOSimpleObject">	
+	<field key="fraternalYearName" dbtype="varchar" precision="10" phptype="string" null="false"/>
+	<field key="dateStart" dbtype="date" phptype="date" null="false"/>
+	<field key="dateEnd" dbtype="date" phptype="date" null="false"/>
+	<composite alias="fraternalYearCouncilOfficerAssignment" class="councilOfficerAssignment" local="id" foreign="fraternalYearId" cardinality="many" owner="local"/>
+</object>
+<object class="meeting" table="kofctn_meeting" extends="xPDOSimpleObject">
+	<field key="meetingName" dbtype="varchar" precision="45" phptype="string" null="false"/>
+</object>
+<object class="memberAward" table="kofctn_memberAward"  extends="xPDOSimpleObject">
+	<field key="memberId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<field key="fraternalYearId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<field key="awardId" dbtype="int" precision="8" phptype="integer" null="false"/>
+</object>
+<object class="district" table="kofctn_district" extends="xPDOSimpleObject">
+	<field key="districtNominalId" dbtype="int" precision="2" phptype="integer" null="false"/>
+	<field key="regionId" dbtype="int" precision="8" phptype="integer" null="false"/>
+	<composite alias="districtCouncilOfficerAssignment" class="councilOfficerAssignment" local="id" foreign="districtId" cardinality="many" owner="local"/>
+	<composite alias="districtCouncil" class="council" local="id" foreign="districtId" cardinality="many" owner="local"/>
+</object>
+<object class="region" table="kofctn_region" extends="xPDOSimpleObject">
+	<field key="regionName" dbtype="varchar" precision="20" phptype="string" null="false"/>
+</object>
+<object class="councilOfficerAssignment" table="kofctn_councilOfficerAssignment" extends="xPDOSimpleObject">
+	<field key="districtId" dbtype="int" precision="8" phptype="" null="true"/>
+	<field key="councilId" dbtype="int" precision="8" phptype="" null="true"/>
+	<field key="memberId" dbtype="int" precision="8" phptype="" null="false"/>
+	<field key="fraternalYearId" dbtype="int" precision="8" phptype="" null="false"/>
+	<field key="officerRoleId" dbtype="int" precision="8" phptype="" null="false"/>
+	<field key="isCurrentAssignee" dbtype="int" precision="4" phptype="" null="false"/>
+	<aggregate alias="councilOfficerAssignmentDistrict" class="district" local="districtId" foreign="id" cardinality="one" owner="foreign"/>
+	<aggregate alias="councilOfficerAssignmentCouncil" class="council" local="councilId" foreign="id" cardinality="one" owner="foreign"/>
+	<aggregate alias="councilOfficerAssignmentFraternalYear" class="fraternalYear" local="fraternalYearId" foreign="id" cardinality="one" owner="foreign"/>
+	<aggregate alias="councilOfficerAssignmentMember" class="kofcuser" local="memberId" foreign="id" cardinality="one" owner="foreign"/>
+	<aggregate alias="councilOfficerAssignmentOfficerRole" class="officerRole" local="officerRoleId" foreign="id" cardinality="one" owner="foreign"/>
+</object>
+
 </model>
