@@ -43,7 +43,47 @@ $modx->addPackage('kofctn',$base_path.'model/');
         return $sent;
     }
 
+function validateParameters($modx,$params){
+	
+	
+	
+	$msg='';
+	if (!$params['name']){
+		$msg.='Name is a required field.<br/>';
+	}
+
+	if (!$params['memberNumber']){
+		$msg.='Member Number is a required field.<br/>';
+	} else { 
+		$ae = checkAccountExists($modx,$params['memberNumber']);
+		$msg.=($ae?'An account with this member number already exists.  If you have forgotten your password, please click the \'Forgot Password\' button on the main menu.<br/>':'');
+	}
+	if (!$params['memberEmail']){
+		$msg.='Member Email is a required field.<br/>';
+	}
+	if (!$params['councilNumber']){
+		$msg.='Council Number is a required field.<br/>';
+	} else {
+	
+	
+		$c= $modx->getObject('council',array('councilNumber'=>$params['councilNumber']));
+
+		$msg.=($c?'':'Your council number was not recognized.');
+	}
+	
+	return $msg?'<label class="error h4">There are some problems with your request.  Please check the issues below and try your request again.<br/>'.$msg.'</label>':null;
+}
+
+function checkAccountExists($modx, $memberNumber){
+
+	$ku = $modx->getObject('kofcuser',array('name'=>$memberNumber));	
+	return ($ku?1:null);
+	
+}
+
 function requestAccess($modx,$params){
+	
+
 	
 	$send1=sendEmail($modx,'prowler27708@gmail.com','','New Member Request: '.$params['memberNumber'],array_merge($params,array('tpl'=>'requestAccess_email_tpl')));
 	$send2=sendEmail($modx,$params['memberEmail'],'','Membership Request Recieved: '.$params['memberNumber'],array_merge($params,array('tpl'=>'requestAccess_email_tpl')));
@@ -84,7 +124,25 @@ function formatPhone($phoneProp){
  	return $ret;
 }
  
-function officerAssignments($modx, $member, $council, $currentOnly){
+function officerAssignments($modx,$member,$currentOnly){
+
+	$q=$modx->newQuery('officerAssignment');
+	$q->where(array('memberId'=>$member->get('id')));
+	if ($currentOnly){
+		$q->where(array('isCurrentAssignee'=>1));
+	}
+	
+	$q->select(array('fraternalYearName','roleName','entityDisplayName','isCurrentAssignee'));
+	$q->sortby('fraternalYearName','ASC');
+	//$q->prepare();
+	//print_r($q->toSQL());
+	
+	$officerAssignments=$modx->getIterator('officerAssignment',$q,false);
+	return $officerAssignments;
+	
+}
+ /*
+function officerAssignments_dep($modx, $member, $council, $currentOnly){
   	$q = $modx->newQuery('councilOfficerAssignment');
  	
  	if ($member){
@@ -121,8 +179,26 @@ function officerAssignments($modx, $member, $council, $currentOnly){
  	$officerAssignments=$modx->getIterator('councilOfficerAssignment',$q);
  	return $officerAssignments;
 }
-
+*/
 function renderOfficer($modx,$chunkName,$assignments){
+	$returnText = '';
+	foreach ($assignments as $assignment) {
+		$role=$assignment->get('roleName');
+		$councilDisplay=$assignment->get('entityDisplayName');
+		$fy=$assignment->get('fraternalYearName');
+		$officerDisplay = $role . ', ' . $councilDisplay . ' - FY ' . $fy;
+		
+		$propArray = array(
+			'councilDisplay'=>$councilDisplay,
+			'role'=>$role,
+			'fy'=>$fy,
+			'officerDisplay'=>$officerDisplay);
+		$returnText.=$modx->getChunk($chunkName,$propArray);
+	}
+	return $returnText;
+}
+/*
+function renderOfficer_dep($modx,$chunkName,$assignments){
 	$returnText = '';
 	foreach ($assignments as $assignment) {
 		$role=$assignment->get('role_roleName');
@@ -146,7 +222,7 @@ function renderOfficer($modx,$chunkName,$assignments){
 	}
 	return $returnText;
 }
-
+*/
 
 function renderSearchRow($modx,$result1,$result2,$result3) {
 	$prop=array('result1'=>$result1,'result2'=>$result2,'result3'=>$result3);
@@ -206,14 +282,14 @@ function search($modx){
 	if(isset($_POST['firstname'])){
 		$fname=$_POST['firstname'];
 		if($fname){
-		$fnameSearch = array('firstName:='=>$fname,'OR:preferredFirstName:='=>$fname);
+		$fnameSearch = array('firstName:LIKE'=>$fname.'%','OR:preferredFirstName:LIKE'=>$fname.'%');
 		array_push($searchParams,$fnameSearch);	
 		}
 	}
 	if(isset($_POST['lastname'])){
 		$lname=$_POST['lastname'];
 		if($lname){
-		$lnameSearch = array('lastName:='=>$lname);
+		$lnameSearch = array('lastName:LIKE'=>$lname.'%');
 		array_push($searchParams,$lnameSearch);	
 		}
 	}
@@ -268,11 +344,13 @@ if($myuser){
 	
 	$modx->toPlaceholders(array('phoneNumberTpl'=>$phonePlaceholder),'memberPhone');
 
-    $assignments = officerAssignments($modx,$myuser,null,true);
+    //$assignments = officerAssignments($modx,$myuser,null,true);
+    $assignments = officerAssignments($modx,$myuser,true);
 	$officerText = renderOfficer($modx,'kofctn_currentOfficer',$assignments);
 	$modx->toPlaceholders(array('currentOfficerTpl'=>$officerText));
 	
-	$assignments = officerAssignments($modx,$myuser,null,false);
+//	$assignments = officerAssignments($modx,$myuser,null,false);
+	$assignments = officerAssignments($modx,$myuser,false);
 	$officerText = renderOfficer($modx,'kofctn_officer',$assignments);
 	$modx->toPlaceholders(array('officerRowTpl'=>$officerText));
 	
@@ -336,7 +414,7 @@ function getCouncilAddress($modx,$council,$addressType){
 	
 	return $returnVal;
 }
-
+/*
 function council($modx){
 
 	$council=getCouncil($modx);
@@ -358,25 +436,37 @@ function council($modx){
 	return null;
 	
 }
+*/
 
-
-
+/*
 if ($method=='profile') {profile($modx); return null;}
 
-if ($method=='council'){council($modx);return null;}
+if ($method=='council'){return 'Deprecated council method invoked.';}
+//if ($method=='council'){council($modx);return null;}
 
 if ($method=='request') {
 	$params = array(
-			'name'=>isset($_POST['name'])?$_POST['name']:""
-			,'memberEmail'=>isset($_POST['email'])?$_POST['email']:""
-			,'memberNumber'=>isset($_POST['memberNumber'])?$_POST['memberNumber']:""
-			,'councilNumber'=>isset($_POST['councilNumber'])?$_POST['councilNumber']:""
+			'name'=>isset($_POST['name'])?$_POST['name']:null
+			,'memberEmail'=>isset($_POST['email'])?$_POST['email']:null
+			,'memberNumber'=>isset($_POST['memberNumber'])?$_POST['memberNumber']:null
+			,'councilNumber'=>isset($_POST['councilNumber'])?$_POST['councilNumber']:null
 	);
 
-	$sent=requestAccess($modx,$params); 
-	if ($sent) {echo("Your request was received.  Please check your email for confirmation.  If you do not see the confirmation within 1 day, please email webmaster@kofc-tn.org");}
-	return null;
+		$validMsg = validateParameters($modx, $params);
 
+		if ($validMsg){
+			echo $validMsg;
+		} else {
+			$sent=requestAccess($modx,$params); 
+			if ($sent) {
+				echo("<label class='success h4'>Your request was received.  Please check your email for confirmation.  If you do not see the confirmation within 1 day, please email webmaster@kofc-tn.org.</label>");
+			}
+		}
+		
+		return null;
+		
 }
 
 if ($method=='search') {$searchResults=search($modx); renderSearchResult($modx,$searchResults); return null;}
+*/
+return null;

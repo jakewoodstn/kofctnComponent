@@ -12,6 +12,7 @@ $xpdo_meta_map['councilMeeting']= array (
     'dayOfWeek' => NULL,
     'dayOfMonth' => NULL,
     'timeOfDay' => NULL,
+    'notes' => NULL,
   ),
   'fieldMeta' => 
   array (
@@ -56,6 +57,32 @@ $xpdo_meta_map['councilMeeting']= array (
       'precision' => '255',
       'phptype' => 'string',
       'null' => true,
+    ),
+    'notes' => 
+    array (
+      'dbtype' => 'varchar',
+      'precision' => '255',
+      'phptype' => 'string',
+      'null' => true,
+    ),
+  ),
+  'aggregates' => 
+  array (
+    'councilMeetingMeeting' => 
+    array (
+      'class' => 'meeting',
+      'local' => 'meetingId',
+      'foreign' => 'id',
+      'cardinality' => 'one',
+      'owner' => 'foreign',
+    ),
+    'councilMeetingCouncil' => 
+    array (
+      'class' => 'council',
+      'local' => 'councilId',
+      'foreign' => 'id',
+      'cardinality' => 'many',
+      'owner' => 'foreign',
     ),
   ),
 );

@@ -60,14 +60,6 @@ $xpdo_meta_map['councilOfficerAssignment']= array (
   ),
   'aggregates' => 
   array (
-    'councilOfficerAssignmentDistrict' => 
-    array (
-      'class' => 'district',
-      'local' => 'districtId',
-      'foreign' => 'id',
-      'cardinality' => 'one',
-      'owner' => 'foreign',
-    ),
     'councilOfficerAssignmentCouncil' => 
     array (
       'class' => 'council',

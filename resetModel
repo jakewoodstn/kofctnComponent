@@ -1,0 +1,2 @@
+rm -R core/components/kofctn/model/kofctn/*
+curl http://jakewoodstn.net/comtest/_build/build.schema.php

@@ -18,5 +18,18 @@ $xpdo_meta_map = array (
     12 => 'district',
     13 => 'region',
     14 => 'councilOfficerAssignment',
+    15 => 'rsvpRequest',
+    16 => 'rsvpResponse',
+    17 => 'message',
+    18 => 'messageRecipient',
+    19 => 'degreeCalendar',
+  ),
+  'xPDOObject' => 
+  array (
+    0 => 'officerAssignment',
+    1 => 'rsvpOutstandingRequest',
+    2 => 'rsvpResponseDetail',
+    3 => 'memberDashboardComponent',
+    4 => 'councilOfficerRoster',
   ),
 );

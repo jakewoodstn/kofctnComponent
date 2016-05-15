@@ -9,6 +9,7 @@ $xpdo_meta_map['kofcuser']= array (
     'name' => '',
     'createdAt' => NULL,
     'imagePath' => NULL,
+    'title' => NULL,
     'firstName' => NULL,
     'preferredFirstName' => NULL,
     'lastName' => NULL,
@@ -37,6 +38,13 @@ $xpdo_meta_map['kofcuser']= array (
     array (
       'dbtype' => 'varchar',
       'precision' => '255',
+      'phptype' => 'string',
+      'null' => true,
+    ),
+    'title' => 
+    array (
+      'dbtype' => 'varchar',
+      'precision' => '10',
       'phptype' => 'string',
       'null' => true,
     ),

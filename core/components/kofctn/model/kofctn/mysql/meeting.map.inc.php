@@ -18,4 +18,15 @@ $xpdo_meta_map['meeting']= array (
       'null' => false,
     ),
   ),
+  'composites' => 
+  array (
+    'meetingCouncilMeeting' => 
+    array (
+      'class' => 'councilMeeting',
+      'local' => 'id',
+      'foreign' => 'meetingId',
+      'cardinality' => 'many',
+      'owner' => 'local',
+    ),
+  ),
 );

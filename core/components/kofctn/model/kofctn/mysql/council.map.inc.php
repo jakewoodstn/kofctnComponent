@@ -83,6 +83,14 @@ $xpdo_meta_map['council']= array (
       'cardinality' => 'many',
       'owner' => 'local',
     ),
+    'councilCouncilMeeting' => 
+    array (
+      'class' => 'councilMeeting',
+      'local' => 'id',
+      'foreign' => 'councilId',
+      'cardinality' => 'many',
+      'owner' => 'local',
+    ),
   ),
   'aggregates' => 
   array (
